@@ -7,8 +7,6 @@ import android.bluetooth.le.BluetoothLeScanner
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import ru.alexsergeev.bluetoothscanner.model.models.Device
 import ru.alexsergeev.bluetoothscanner.model.repository.BLEScannerRepository
@@ -16,11 +14,10 @@ import ru.alexsergeev.bluetoothscanner.model.repository.BLEScannerRepository
 class BLEScannerViewModel(
     private val bluetoothManager: BluetoothManager,
     private val repository: BLEScannerRepository,
-) :
-    ViewModel() {
-
-    private val _devices = MutableStateFlow<List<Device>>(emptyList())
-    val devices = _devices.asStateFlow()
+) : ViewModel() {
+    companion object {
+        const val LOCATION_PERMISSION_REQUEST_CODE = 1
+    }
 
     private var bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
     private var scanner: BluetoothLeScanner? = null
@@ -29,18 +26,14 @@ class BLEScannerViewModel(
         repository.checkBluetoothSupport()
         scanner = bluetoothAdapter?.bluetoothLeScanner
     }
-
     fun startScanning(activity: Activity, context: Context) {
         viewModelScope.launch {
             repository.startScanning(activity, context)
         }
     }
-
-    fun setDevices() {
-        repository.setDevices(devices.value)
+    fun setDevices(devices: List<Device>) {
+        repository.setDevices(devices)
     }
+    fun getDevices() = repository.getDevices()
 
-    companion object {
-        const val LOCATION_PERMISSION_REQUEST_CODE = 1
-    }
 }

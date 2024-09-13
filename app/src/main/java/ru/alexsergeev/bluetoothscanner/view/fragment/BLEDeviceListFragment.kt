@@ -9,8 +9,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
@@ -20,10 +18,9 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import ru.alexsergeev.bluetoothscanner.R
+import ru.alexsergeev.bluetoothscanner.databinding.DeviceListFragmentBinding
 import ru.alexsergeev.bluetoothscanner.model.adapter.DeviceAdapter
 import ru.alexsergeev.bluetoothscanner.model.repository.BLEScannerRepository
 import ru.alexsergeev.bluetoothscanner.model.repository.BLEScannerRepositoryImpl
@@ -35,36 +32,34 @@ import kotlin.time.Duration.Companion.seconds
 class BLEDeviceListFragment : Fragment() {
 
     private val bluetoothManager by lazy { requireActivity().getSystemService(BluetoothManager::class.java) }
-    private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
-
-    private lateinit var repository: BLEScannerRepository
-
     private val viewModel: BLEScannerViewModel by viewModels {
         BLEScannerViewModelFactory(
             bluetoothManager,
             repository
         )
     }
+
+    private lateinit var requestPermissionLauncher: ActivityResultLauncher<String>
+    private lateinit var repository: BLEScannerRepository
     private lateinit var deviceListAdapter: DeviceAdapter
-    private lateinit var recyclerView: RecyclerView
-    private lateinit var scanButton: Button
-    private lateinit var progressBar: ProgressBar
+
+    private var _binding: DeviceListFragmentBinding? = null
+    private val binding = checkNotNull(_binding)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(
-            R.layout.device_list_fragment,
-            container,
-            false
+    ): View {
+
+        _binding = DeviceListFragmentBinding.inflate(
+            inflater, container, false
         )
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         repository = BLEScannerRepositoryImpl(bluetoothManager, requireContext())
-
         requestPermissionLauncher =
             registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
                 if (isGranted) {
@@ -81,19 +76,15 @@ class BLEDeviceListFragment : Fragment() {
         setupRecyclerView(view)
 
         lifecycleScope.launch {
-            viewModel.devices.collect { devices ->
-                deviceListAdapter.submitList(devices)
-                viewModel.setDevices()
-            }
+            deviceListAdapter.submitList(viewModel.getDevices())
+            viewModel.setDevices(viewModel.getDevices())
         }
 
-        scanButton = view.findViewById(R.id.scan_button)
-        progressBar = view.findViewById(R.id.progress_bar) ?: throw Exception()
-        scanButton.setOnClickListener {
+        binding.scanButton.setOnClickListener {
             lifecycleScope.launch {
-                progressBar.isVisible = true
+                binding.progressBar.isVisible = true
                 delay(3.seconds)
-                progressBar.isVisible = false
+                binding.progressBar.isVisible = false
                 requestBluetoothPermissions()
             }
         }
@@ -136,10 +127,8 @@ class BLEDeviceListFragment : Fragment() {
     }
 
     private fun setupRecyclerView(view: View) {
-        recyclerView =
-            view.findViewById(R.id.recycler_view)
         deviceListAdapter = DeviceAdapter()
-        recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        recyclerView.adapter = deviceListAdapter
+        binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        binding.recyclerView.adapter = deviceListAdapter
     }
 }

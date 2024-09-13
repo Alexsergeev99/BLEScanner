@@ -9,5 +9,8 @@ interface BLEScannerRepository {
     fun startScanning(activity: Activity, context: Context)
     fun stopScanning()
     fun setDevices(devices: List<Device>)
+
+    fun getDevices(): List<Device>
+
     fun updateDeviceList(device: Device)
 }

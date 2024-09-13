@@ -25,7 +25,7 @@ class BLEScannerRepositoryImpl(
     private var scanCallback: ScanCallback? = null
 
     private val _devices = MutableStateFlow<List<Device>>(emptyList())
-    val devices = _devices.asStateFlow()
+    private val devices = _devices.asStateFlow()
 
     override fun checkBluetoothSupport(): String {
         if (!bluetoothAdapter.isEnabled) {
@@ -110,4 +110,6 @@ class BLEScannerRepositoryImpl(
     override fun setDevices(devices: List<Device>) {
         _devices.value = devices
     }
+
+    override fun getDevices(): List<Device> = devices.value
 }
