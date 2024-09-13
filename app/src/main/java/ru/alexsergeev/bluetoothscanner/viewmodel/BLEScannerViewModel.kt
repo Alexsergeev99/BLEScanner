@@ -26,14 +26,17 @@ class BLEScannerViewModel(
         repository.checkBluetoothSupport()
         scanner = bluetoothAdapter?.bluetoothLeScanner
     }
+
     fun startScanning(activity: Activity, context: Context) {
         viewModelScope.launch {
             repository.startScanning(activity, context)
         }
     }
+
     fun setDevices(devices: List<Device>) {
         repository.setDevices(devices)
     }
+
     fun getDevices() = repository.getDevices()
 
 }

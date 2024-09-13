@@ -44,7 +44,8 @@ class BLEDeviceListFragment : Fragment() {
     private lateinit var deviceListAdapter: DeviceAdapter
 
     private var _binding: DeviceListFragmentBinding? = null
-    private val binding = checkNotNull(_binding)
+    private val binding
+        get() = _binding!!
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -73,7 +74,7 @@ class BLEDeviceListFragment : Fragment() {
                 }
             }
 
-        setupRecyclerView(view)
+        setupRecyclerView()
 
         lifecycleScope.launch {
             deviceListAdapter.submitList(viewModel.getDevices())
@@ -126,7 +127,7 @@ class BLEDeviceListFragment : Fragment() {
         }
     }
 
-    private fun setupRecyclerView(view: View) {
+    private fun setupRecyclerView() {
         deviceListAdapter = DeviceAdapter()
         binding.recyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerView.adapter = deviceListAdapter
